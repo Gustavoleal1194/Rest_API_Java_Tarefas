@@ -9,10 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gustavo.agendadortarefas.dto.EtiquetaResponseDTO;
 import com.gustavo.agendadortarefas.dto.TarefaRequestDTO;
 import com.gustavo.agendadortarefas.dto.TarefaResponseDTO;
+import com.gustavo.agendadortarefas.dto.UsuarioResumoDTO;
 import com.gustavo.agendadortarefas.exception.BusinessException;
 import com.gustavo.agendadortarefas.exception.ResourceNotFoundException;
 import com.gustavo.agendadortarefas.model.Etiqueta;
 import com.gustavo.agendadortarefas.model.Tarefa;
+import com.gustavo.agendadortarefas.model.Usuario;
 import com.gustavo.agendadortarefas.repository.TarefaRepository;
 
 @Service
@@ -20,10 +22,12 @@ public class TarefaService {
 
 	private final TarefaRepository tarefaRepository;
 	private final EtiquetaService etiquetaService;
+	private final UsuarioService usuarioService;
 
-	public TarefaService(TarefaRepository tarefaRepository, EtiquetaService etiquetaService) {
+	public TarefaService(TarefaRepository tarefaRepository, EtiquetaService etiquetaService, UsuarioService usuarioService) {
 		this.tarefaRepository = tarefaRepository;
 		this.etiquetaService = etiquetaService;
+		this.usuarioService = usuarioService;
 	}
 
 	@Transactional
@@ -106,11 +110,13 @@ public class TarefaService {
 	}
 
 	private void preencherDados(Tarefa tarefa, TarefaRequestDTO request) {
+		Usuario usuario = usuarioService.buscarUsuarioAtivo(request.usuarioId());
 		tarefa.setTitulo(request.titulo().trim());
 		tarefa.setDescricao(request.descricao());
 		tarefa.setDataLimite(request.dataLimite());
 		tarefa.setStatus(request.status());
 		tarefa.setPrioridade(request.prioridade());
+		tarefa.setUsuario(usuario);
 	}
 
 	private Tarefa buscarTarefaAtiva(Long id) {
@@ -118,13 +124,19 @@ public class TarefaService {
 			.orElseThrow(() -> new ResourceNotFoundException("Tarefa nao encontrada com id " + id));
 	}
 
-	private TarefaResponseDTO toResponse(Tarefa tarefa) {
+	TarefaResponseDTO toResponse(Tarefa tarefa) {
 		List<EtiquetaResponseDTO> etiquetas = tarefa.getEtiquetas()
 			.stream()
 			.filter(Etiqueta::getAtivo)
 			.sorted(Comparator.comparing(Etiqueta::getNome))
 			.map(etiquetaService::toResponse)
 			.toList();
+
+		UsuarioResumoDTO usuario = new UsuarioResumoDTO(
+			tarefa.getUsuario().getId(),
+			tarefa.getUsuario().getNome(),
+			tarefa.getUsuario().getEmail()
+		);
 
 		return new TarefaResponseDTO(
 			tarefa.getId(),
@@ -134,6 +146,7 @@ public class TarefaService {
 			tarefa.getStatus(),
 			tarefa.getPrioridade(),
 			tarefa.getAtivo(),
+			usuario,
 			etiquetas
 		);
 	}

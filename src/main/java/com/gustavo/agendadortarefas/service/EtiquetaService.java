@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gustavo.agendadortarefas.dto.EtiquetaRequestDTO;
 import com.gustavo.agendadortarefas.dto.EtiquetaResponseDTO;
 import com.gustavo.agendadortarefas.dto.TarefaResponseDTO;
+import com.gustavo.agendadortarefas.dto.UsuarioResumoDTO;
 import com.gustavo.agendadortarefas.exception.BusinessException;
 import com.gustavo.agendadortarefas.exception.ResourceNotFoundException;
 import com.gustavo.agendadortarefas.model.Etiqueta;
@@ -119,6 +120,11 @@ public class EtiquetaService {
 			tarefa.getStatus(),
 			tarefa.getPrioridade(),
 			tarefa.getAtivo(),
+			new UsuarioResumoDTO(
+				tarefa.getUsuario().getId(),
+				tarefa.getUsuario().getNome(),
+				tarefa.getUsuario().getEmail()
+			),
 			etiquetas
 		);
 	}

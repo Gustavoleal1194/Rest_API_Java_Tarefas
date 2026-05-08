@@ -126,6 +126,16 @@ Campos principais:
 - `ativo`
 - `tarefas`
 
+### Usuario
+
+Campos principais:
+
+- `id`
+- `nome`
+- `email`
+- `ativo`
+- `tarefas`
+
 ## Relacionamento muitos-para-muitos
 
 Uma tarefa pode ter varias etiquetas, e uma etiqueta pode estar em varias tarefas.
@@ -205,6 +215,17 @@ PUT    /api/etiquetas/{id}
 DELETE /api/etiquetas/{id}
 ```
 
+### Usuarios
+
+```text
+GET    /api/usuarios
+GET    /api/usuarios/{id}
+POST   /api/usuarios
+PUT    /api/usuarios/{id}
+DELETE /api/usuarios/{id}
+GET    /api/usuarios/{id}/tarefas
+```
+
 ### Relacionamento
 
 ```text
@@ -226,7 +247,19 @@ GET    /api/etiquetas/{etiquetaId}/tarefas
   "descricao": "Revisar JPA, DTOs e validacoes",
   "dataLimite": "2026-05-14",
   "status": "PENDENTE",
-  "prioridade": "ALTA"
+  "prioridade": "ALTA",
+  "usuarioId": 1
+}
+```
+
+### Criar usuario
+
+`POST /api/usuarios`
+
+```json
+{
+  "nome": "Gustavo Leal",
+  "email": "gustavo@email.com"
 }
 ```
 
@@ -255,7 +288,8 @@ GET    /api/etiquetas/{etiquetaId}/tarefas
   "descricao": "Revisar JPA, DTOs, validacoes e relacionamento muitos-para-muitos",
   "dataLimite": "2026-05-14",
   "status": "EM_ANDAMENTO",
-  "prioridade": "ALTA"
+  "prioridade": "ALTA",
+  "usuarioId": 1
 }
 ```
 

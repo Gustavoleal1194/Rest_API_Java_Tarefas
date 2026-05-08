@@ -14,6 +14,7 @@ public record TarefaResponseDTO(
 	StatusTarefa status,
 	PrioridadeTarefa prioridade,
 	Boolean ativo,
+	UsuarioResumoDTO usuario,
 	List<EtiquetaResponseDTO> etiquetas
 ) {
 }

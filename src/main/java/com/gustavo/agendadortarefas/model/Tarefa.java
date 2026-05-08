@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -42,6 +43,10 @@ public class Tarefa {
 
 	@Column(nullable = false)
 	private Boolean ativo = true;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "usuario_id", nullable = false)
+	private Usuario usuario;
 
 	@ManyToMany
 	@JoinTable(
@@ -105,6 +110,14 @@ public class Tarefa {
 
 	public void setAtivo(Boolean ativo) {
 		this.ativo = ativo;
+	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 
 	public Set<Etiqueta> getEtiquetas() {

@@ -10,12 +10,15 @@ import com.gustavo.agendadortarefas.model.Tarefa;
 
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
-	@EntityGraph(attributePaths = "etiquetas")
+	@EntityGraph(attributePaths = {"etiquetas", "usuario"})
 	List<Tarefa> findAllByAtivoTrue();
 
-	@EntityGraph(attributePaths = "etiquetas")
+	@EntityGraph(attributePaths = {"etiquetas", "usuario"})
 	Optional<Tarefa> findByIdAndAtivoTrue(Long id);
 
-	@EntityGraph(attributePaths = "etiquetas")
+	@EntityGraph(attributePaths = {"etiquetas", "usuario"})
 	List<Tarefa> findByEtiquetasIdAndAtivoTrue(Long etiquetaId);
+
+	@EntityGraph(attributePaths = {"etiquetas", "usuario"})
+	List<Tarefa> findByUsuarioIdAndAtivoTrue(Long usuarioId);
 }

@@ -23,6 +23,9 @@ public record TarefaRequestDTO(
 	StatusTarefa status,
 
 	@NotNull(message = "A prioridade da tarefa e obrigatoria")
-	PrioridadeTarefa prioridade
+	PrioridadeTarefa prioridade,
+
+	@NotNull(message = "O usuario da tarefa e obrigatorio")
+	Long usuarioId
 ) {
 }
