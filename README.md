@@ -44,36 +44,34 @@ winget install Oracle.MySQL
 
 Depois feche e abra novamente o terminal e rode novamente `mvn -version` e `mysql --version`.
 
-## Banco de dados
-
-Crie o banco e o usuario da aplicacao no MySQL:
-
-```sql
-CREATE DATABASE agendador_tarefas_db;
-CREATE USER IF NOT EXISTS 'agendador_user'@'localhost' IDENTIFIED BY '123456';
-GRANT ALL PRIVILEGES ON agendador_tarefas_db.* TO 'agendador_user'@'localhost';
-FLUSH PRIVILEGES;
-```
-
 ## Configuracao
 
-O projeto ja esta configurado para usar um usuario proprio da aplicacao:
+O projeto esta configurado para:
+
+- criar o banco automaticamente (`createDatabaseIfNotExist=true`)
+- criar/atualizar tabelas automaticamente via JPA (`ddl-auto=update`)
+- aceitar credenciais por variaveis de ambiente
 
 ```properties
 spring.application.name=agendador-tarefas
 
-spring.datasource.url=jdbc:mysql://localhost:3306/agendador_tarefas_db?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
-spring.datasource.username=agendador_user
-spring.datasource.password=123456
+spring.datasource.url=${DB_URL:jdbc:mysql://localhost:3306/agendador_tarefas_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true}
+spring.datasource.username=${DB_USER:root}
+spring.datasource.password=${DB_PASS:}
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 
-server.port=8080
+server.port=${SERVER_PORT:8080}
 ```
 
-Se quiser trocar a senha, altere no MySQL e atualize `spring.datasource.password`.
+Se o MySQL local tiver senha, basta definir antes de executar:
+
+```powershell
+$env:DB_USER="root"
+$env:DB_PASS="SUA_SENHA"
+```
 
 ## Como executar
 
