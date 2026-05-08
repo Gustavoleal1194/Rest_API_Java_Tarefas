@@ -2,3 +2,7 @@
 target/
 *.class
 spring-boot-run.log
+.classpath
+.project
+.settings/
+bin/
