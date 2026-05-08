@@ -46,22 +46,25 @@ Depois feche e abra novamente o terminal e rode novamente `mvn -version` e `mysq
 
 ## Banco de dados
 
-Crie o banco no MySQL:
+Crie o banco e o usuario da aplicacao no MySQL:
 
 ```sql
 CREATE DATABASE agendador_tarefas_db;
+CREATE USER IF NOT EXISTS 'agendador_user'@'localhost' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON agendador_tarefas_db.* TO 'agendador_user'@'localhost';
+FLUSH PRIVILEGES;
 ```
 
 ## Configuracao
 
-Edite `src/main/resources/application.properties` e altere a senha do MySQL:
+O projeto ja esta configurado para usar um usuario proprio da aplicacao:
 
 ```properties
 spring.application.name=agendador-tarefas
 
 spring.datasource.url=jdbc:mysql://localhost:3306/agendador_tarefas_db?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true
-spring.datasource.username=root
-spring.datasource.password=SENHA_DO_MYSQL
+spring.datasource.username=agendador_user
+spring.datasource.password=123456
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
@@ -70,7 +73,7 @@ spring.jpa.properties.hibernate.format_sql=true
 server.port=8080
 ```
 
-Troque `SENHA_DO_MYSQL` pela senha local do usuario `root`, ou altere usuario e senha conforme sua instalacao.
+Se quiser trocar a senha, altere no MySQL e atualize `spring.datasource.password`.
 
 ## Como executar
 
