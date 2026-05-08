@@ -35,16 +35,14 @@ mvn -version
 mysql --version
 ```
 
-Observacao sobre este ambiente: o JDK 17 foi encontrado, mas `mvn` e `mysql` nao estavam disponiveis no PATH. Instale o Maven e o MySQL, ou ajuste o PATH, antes de executar o projeto pela linha de comando.
-
-No Windows, uma forma objetiva de resolver e:
+Se algum comando nao for reconhecido no terminal, no Windows uma forma objetiva de instalar e:
 
 ```bash
 winget install Apache.Maven
 winget install Oracle.MySQL
 ```
 
-Depois feche e abra novamente o terminal e rode `mvn -version` e `mysql --version`.
+Depois feche e abra novamente o terminal e rode novamente `mvn -version` e `mysql --version`.
 
 ## Banco de dados
 
