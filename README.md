@@ -1,33 +1,44 @@
 # Agendador de Tarefas
 
-API REST backend em Java 17 com Spring Boot 4.0.4 para o trabalho final da disciplina de Programacao Web Java.
+API REST desenvolvida em Java 17 com Spring Boot para gerenciamento de usuarios, tarefas e etiquetas.
 
-## Descricao
+O projeto foi criado para a disciplina de Programacao Web Java e implementa uma arquitetura em camadas com controllers, services, repositories, DTOs, validacoes e tratamento global de excecoes.
 
-O sistema permite cadastrar tarefas e etiquetas, alem de associar varias etiquetas a uma tarefa. O projeto nao possui frontend, autenticacao, login, notificacoes, calendario avancado ou envio de e-mail.
+## Sobre o projeto
 
-## Tema escolhido
+O Agendador de Tarefas permite:
 
-API Agendador de Tarefas.
+- cadastrar usuarios
+- cadastrar tarefas para usuarios
+- cadastrar etiquetas
+- vincular varias etiquetas a uma tarefa
+- listar tarefas por usuario
+- listar etiquetas de uma tarefa
+- listar tarefas vinculadas a uma etiqueta
+- realizar remocao logica de usuarios, tarefas e etiquetas
 
-## Tecnologias utilizadas
+O projeto e somente backend. Nao possui frontend, login, autenticacao, notificacoes, calendario avancado ou envio de e-mail.
+
+## Tecnologias
 
 - Java 17
 - Spring Boot 4.0.4
 - Spring Web
 - Spring Data JPA
 - Hibernate
-- MySQL
 - Bean Validation com `jakarta.validation`
+- MySQL
 - Maven
 
-## Requisitos para rodar
+## Requisitos
 
-- JDK 17 instalado
-- Maven instalado
-- MySQL instalado e rodando
+Antes de executar, tenha instalado:
 
-Comandos para verificar:
+- JDK 17
+- Maven
+- MySQL
+
+Para verificar:
 
 ```bash
 java -version
@@ -35,22 +46,18 @@ mvn -version
 mysql --version
 ```
 
-Se algum comando nao for reconhecido no terminal, no Windows uma forma objetiva de instalar e:
+No Windows, caso Maven ou MySQL nao estejam instalados, uma opcao e usar:
 
 ```bash
 winget install Apache.Maven
 winget install Oracle.MySQL
 ```
 
-Depois feche e abra novamente o terminal e rode novamente `mvn -version` e `mysql --version`.
+Depois da instalacao, feche e abra novamente o terminal.
 
-## Configuracao
+## Configuracao do banco
 
-O projeto esta configurado para:
-
-- criar o banco automaticamente (`createDatabaseIfNotExist=true`)
-- criar/atualizar tabelas automaticamente via JPA (`ddl-auto=update`)
-- aceitar credenciais por variaveis de ambiente
+As configuracoes principais ficam em `src/main/resources/application.properties`:
 
 ```properties
 spring.application.name=agendador-tarefas
@@ -66,16 +73,38 @@ spring.jpa.properties.hibernate.format_sql=true
 server.port=${SERVER_PORT:8080}
 ```
 
-Se o MySQL local tiver senha, basta definir antes de executar:
+Por padrao, a aplicacao tenta acessar o MySQL local com:
+
+- banco: `agendador_tarefas_db`
+- usuario: `root`
+- senha vazia
+- porta da API: `8080`
+
+Se o MySQL tiver senha, configure as variaveis de ambiente antes de rodar.
+
+PowerShell:
 
 ```powershell
 $env:DB_USER="root"
 $env:DB_PASS="SUA_SENHA"
 ```
 
+Bash:
+
+```bash
+export DB_USER=root
+export DB_PASS=SUA_SENHA
+```
+
+Tambem e possivel alterar a porta:
+
+```powershell
+$env:SERVER_PORT="8081"
+```
+
 ## Como executar
 
-Na pasta do projeto:
+Na pasta raiz do projeto:
 
 ```bash
 mvn clean install
@@ -88,11 +117,43 @@ A API ficara disponivel em:
 http://localhost:8080
 ```
 
-## Entidades
+## Estrutura do projeto
+
+```text
+src/main/java/com/gustavo/agendadortarefas
+├── controller   # endpoints REST
+├── dto          # objetos de entrada e saida da API
+├── exception    # excecoes e tratamento global de erros
+├── model        # entidades JPA e enums
+├── repository   # acesso ao banco com Spring Data JPA
+└── service      # regras de negocio
+```
+
+## Entidades principais
+
+### Usuario
+
+Campos:
+
+- `id`
+- `nome`
+- `email`
+- `ativo`
+- `tarefas`
+
+Regras:
+
+- `nome` e obrigatorio
+- `nome` deve ter entre 3 e 120 caracteres
+- `email` e obrigatorio
+- `email` deve ter formato valido
+- `email` deve ter no maximo 120 caracteres
+- nao permite email duplicado
+- usuario com tarefas ativas nao pode ser removido
 
 ### Tarefa
 
-Campos principais:
+Campos:
 
 - `id`
 - `titulo`
@@ -101,6 +162,7 @@ Campos principais:
 - `status`
 - `prioridade`
 - `ativo`
+- `usuario`
 - `etiquetas`
 
 Valores aceitos para `status`:
@@ -116,9 +178,19 @@ Valores aceitos para `prioridade`:
 - `MEDIA`
 - `ALTA`
 
+Regras:
+
+- `titulo` e obrigatorio
+- `titulo` deve ter entre 3 e 120 caracteres
+- `descricao` pode ter no maximo 500 caracteres
+- `status` e obrigatorio
+- `prioridade` e obrigatoria
+- `usuarioId` e obrigatorio
+- `dataLimite` e opcional
+
 ### Etiqueta
 
-Campos principais:
+Campos:
 
 - `id`
 - `nome`
@@ -126,21 +198,24 @@ Campos principais:
 - `ativo`
 - `tarefas`
 
-### Usuario
+Regras:
 
-Campos principais:
+- `nome` e obrigatorio
+- `nome` deve ter entre 3 e 80 caracteres
+- `nome` nao pode ser duplicado
+- `descricao` pode ter no maximo 300 caracteres
 
-- `id`
-- `nome`
-- `email`
-- `ativo`
-- `tarefas`
+## Relacionamentos
 
-## Relacionamento muitos-para-muitos
+### Usuario e tarefa
 
-Uma tarefa pode ter varias etiquetas, e uma etiqueta pode estar em varias tarefas.
+Um usuario pode ter varias tarefas, e cada tarefa pertence a um usuario.
 
-O relacionamento e implementado com `@ManyToMany` e a tabela intermediaria:
+### Tarefa e etiqueta
+
+Uma tarefa pode ter varias etiquetas, e uma etiqueta pode estar vinculada a varias tarefas.
+
+Esse relacionamento muitos-para-muitos usa a tabela intermediaria:
 
 ```text
 tarefa_etiqueta
@@ -148,72 +223,9 @@ tarefa_etiqueta
 - etiqueta_id
 ```
 
-Os controllers retornam DTOs, nao entidades JPA diretamente, para evitar loop infinito no JSON.
-
-## Validacoes
-
-### Tarefa
-
-- `titulo` e obrigatorio
-- `titulo` deve ter entre 3 e 120 caracteres
-- `descricao` pode ter no maximo 500 caracteres
-- `status` e obrigatorio
-- `prioridade` e obrigatoria
-- `dataLimite` e opcional
-
-### Etiqueta
-
-- `nome` e obrigatorio
-- `nome` deve ter entre 3 e 80 caracteres
-- `nome` nao pode ser duplicado
-- `descricao` pode ter no maximo 300 caracteres
-
-## Tratamento de excecoes
-
-O projeto possui tratamento global em `GlobalExceptionHandler`.
-
-Erros tratados:
-
-- Recurso nao encontrado
-- Erro de regra de negocio
-- Erros de validacao do Bean Validation
-- JSON invalido ou valor invalido em enum
-- Erro inesperado
-
-Exemplo de resposta:
-
-```json
-{
-  "dataHora": "2026-05-07T23:59:00",
-  "status": 400,
-  "erro": "Erro de validacao",
-  "mensagens": [
-    "O titulo da tarefa e obrigatorio"
-  ]
-}
-```
+Os controllers retornam DTOs em vez de entidades JPA diretamente, evitando loops no JSON.
 
 ## Endpoints
-
-### Tarefas
-
-```text
-GET    /api/tarefas
-GET    /api/tarefas/{id}
-POST   /api/tarefas
-PUT    /api/tarefas/{id}
-DELETE /api/tarefas/{id}
-```
-
-### Etiquetas
-
-```text
-GET    /api/etiquetas
-GET    /api/etiquetas/{id}
-POST   /api/etiquetas
-PUT    /api/etiquetas/{id}
-DELETE /api/etiquetas/{id}
-```
 
 ### Usuarios
 
@@ -226,16 +238,42 @@ DELETE /api/usuarios/{id}
 GET    /api/usuarios/{id}/tarefas
 ```
 
-### Relacionamento
+### Tarefas
 
 ```text
+GET    /api/tarefas
+GET    /api/tarefas/{id}
+POST   /api/tarefas
+PUT    /api/tarefas/{id}
+DELETE /api/tarefas/{id}
+GET    /api/tarefas/{tarefaId}/etiquetas
 POST   /api/tarefas/{tarefaId}/etiquetas/{etiquetaId}
 DELETE /api/tarefas/{tarefaId}/etiquetas/{etiquetaId}
-GET    /api/tarefas/{tarefaId}/etiquetas
+```
+
+### Etiquetas
+
+```text
+GET    /api/etiquetas
+GET    /api/etiquetas/{id}
+POST   /api/etiquetas
+PUT    /api/etiquetas/{id}
+DELETE /api/etiquetas/{id}
 GET    /api/etiquetas/{etiquetaId}/tarefas
 ```
 
 ## Exemplos de requisicoes
+
+### Criar usuario
+
+`POST /api/usuarios`
+
+```json
+{
+  "nome": "Gustavo Leal",
+  "email": "gustavo@email.com"
+}
+```
 
 ### Criar tarefa
 
@@ -249,17 +287,6 @@ GET    /api/etiquetas/{etiquetaId}/tarefas
   "status": "PENDENTE",
   "prioridade": "ALTA",
   "usuarioId": 1
-}
-```
-
-### Criar usuario
-
-`POST /api/usuarios`
-
-```json
-{
-  "nome": "Gustavo Leal",
-  "email": "gustavo@email.com"
 }
 ```
 
@@ -277,6 +304,17 @@ GET    /api/etiquetas/{etiquetaId}/tarefas
 ### Vincular etiqueta a tarefa
 
 `POST /api/tarefas/1/etiquetas/1`
+
+### Atualizar usuario
+
+`PUT /api/usuarios/1`
+
+```json
+{
+  "nome": "Gustavo Leal",
+  "email": "gustavo.leal@email.com"
+}
+```
 
 ### Atualizar tarefa
 
@@ -304,37 +342,66 @@ GET    /api/etiquetas/{etiquetaId}/tarefas
 }
 ```
 
+## Tratamento de erros
+
+O projeto possui tratamento global em `GlobalExceptionHandler`.
+
+Erros tratados:
+
+- recurso nao encontrado
+- regra de negocio invalida
+- erro de validacao
+- JSON invalido
+- valor invalido para enum
+- erro inesperado
+
+Exemplo de resposta:
+
+```json
+{
+  "dataHora": "2026-05-07T23:59:00",
+  "status": 400,
+  "erro": "Erro de validacao",
+  "mensagens": [
+    "O titulo da tarefa e obrigatorio"
+  ]
+}
+```
+
 ## Roteiro de testes manuais
 
-1. Criar etiqueta
-2. Criar tarefa
-3. Listar tarefas
-4. Buscar tarefa por id
-5. Atualizar tarefa
-6. Vincular etiqueta a tarefa
-7. Listar etiquetas da tarefa
-8. Listar tarefas da etiqueta
-9. Remover vinculo
-10. Remover tarefa
-11. Remover etiqueta
+Uma sequencia recomendada para testar a API:
 
-Tambem teste erros:
+1. Criar usuario
+2. Criar etiqueta
+3. Criar tarefa usando o `usuarioId`
+4. Listar tarefas
+5. Buscar tarefa por id
+6. Atualizar tarefa
+7. Vincular etiqueta a tarefa
+8. Listar etiquetas da tarefa
+9. Listar tarefas da etiqueta
+10. Listar tarefas do usuario
+11. Remover vinculo entre tarefa e etiqueta
+12. Remover tarefa
+13. Remover etiqueta
+14. Remover usuario
 
-- Buscar tarefa inexistente
-- Criar tarefa sem titulo
-- Criar etiqueta duplicada
-- Vincular etiqueta inexistente
-- Vincular a mesma etiqueta duas vezes
+Tambem teste cenarios de erro:
 
-## Arquitetura
+- buscar tarefa inexistente
+- criar usuario com email invalido
+- criar usuario com email duplicado
+- criar tarefa sem titulo
+- criar tarefa sem usuario
+- criar etiqueta duplicada
+- vincular etiqueta inexistente
+- vincular a mesma etiqueta duas vezes
+- remover usuario com tarefas ativas
 
-O projeto usa arquitetura em camadas:
+## Observacoes
 
-```text
-controller  -> recebe as requisicoes HTTP
-service     -> contem regras de negocio
-repository  -> acesso ao banco com Spring Data JPA
-model       -> entidades JPA e enums
-dto         -> objetos de entrada e saida da API
-exception   -> excecoes e tratamento global
-```
+- As remocoes sao logicas: os registros recebem `ativo = false`.
+- As listagens principais retornam apenas registros ativos.
+- Ao remover uma tarefa, os vinculos com etiquetas sao removidos.
+- Ao remover uma etiqueta, ela tambem e desvinculada das tarefas.
